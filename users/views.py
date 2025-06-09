@@ -10,3 +10,10 @@ def signup_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
+
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def home_view(request):
+    return render(request, 'users/home.html')
