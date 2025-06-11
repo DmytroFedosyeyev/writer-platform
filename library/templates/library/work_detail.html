@@ -4,11 +4,35 @@
 
 {% block content %}
 <h2>{{ work.title }}</h2>
+
 <p><strong>Автор:</strong> {{ work.author.username }}</p>
 <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
 <p><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
+
 <hr>
+
 <p>{{ work.content|linebreaks }}</p>
 
 <a href="{% url 'work_list' %}" class="btn btn-secondary mt-3">← Назад к списку</a>
+
+<hr>
+<h3>Комментарии</h3>
+
+{% for comment in comments %}
+  <div class="mb-2">
+    <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"d.m.Y H:i" }}):
+    <p>{{ comment.text|linebreaks }}</p>
+  </div>
+{% empty %}
+  <p>Пока нет комментариев.</p>
+{% endfor %}
+
+<h4 class="mt-4">Оставить комментарий:</h4>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+
 {% endblock %}
