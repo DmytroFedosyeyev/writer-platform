@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ work.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ work.title }}</h2>
+<p><strong>Автор:</strong> {{ work.author.username }}</p>
+<p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
+<p><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
+<hr>
+<p>{{ work.content|linebreaks }}</p>
+
+<a href="{% url 'work_list' %}" class="btn btn-secondary mt-3">← Назад к списку</a>
+{% endblock %}
