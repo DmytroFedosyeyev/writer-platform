@@ -1,9 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Work
 from django.contrib.auth.decorators import login_required
 from django import forms
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
 
 
 class WorkForm(forms.ModelForm):
@@ -24,12 +22,6 @@ def create_work_view(request):
     else:
         form = WorkForm()
     return render(request, 'library/create_work.html', {'form': form})
-
-
-@login_required
-def work_list_view(request):
-    works = Work.objects.all().order_by('-published_date')
-    return render(request, 'library/work_list.html', {'works': works})
 
 
 @login_required
