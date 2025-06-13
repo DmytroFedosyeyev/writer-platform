@@ -4,11 +4,64 @@
 
 {% block content %}
 <h2>{{ work.title }}</h2>
+
 <p><strong>Автор:</strong> {{ work.author.username }}</p>
 <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
 <p><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
+
 <hr>
+
 <p>{{ work.content|linebreaks }}</p>
 
-<a href="{% url 'work_list' %}" class="btn btn-secondary mt-3">← Назад к списку</a>
+<!-- Блок рейтинга -->
+<hr>
+<h4>Ваша оценка:</h4>
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-2">
+    <label for="id_score">Оценка (от 1 до 5):</label>
+    <input
+      type="number"
+      name="score"
+      id="id_score"
+      min="1"
+      max="5"
+      class="form-control"
+      style="max-width: 100px;"
+      value="{{ rating_form.score.value|default_if_none:'' }}"
+    >
+  </div>
+  <button type="submit" name="rate_submit" class="btn btn-primary">Оценить</button>
+</form>
+
+
+{% if average_rating %}
+  <p class="mt-2">⭐ Средняя оценка: {{ average_rating|floatformat:1 }} из 5</p>
+{% else %}
+  <p class="mt-2">Пока нет оценок</p>
+{% endif %}
+
+<!-- Блок комментариев -->
+<hr>
+<h3>Комментарии</h3>
+
+{% for comment in comments %}
+  <div class="mb-2">
+    <strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"d.m.Y H:i" }}):
+    <p>{{ comment.text|linebreaks }}</p>
+  </div>
+{% empty %}
+  <p>Пока нет комментариев.</p>
+{% endfor %}
+
+<!-- Форма комментария -->
+<h4 class="mt-4">Оставить комментарий:</h4>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-success" name="comment_submit">Отправить</button>
+</form>
+
+<!-- Назад -->
+<a href="{% url 'work_list' %}" class="btn btn-secondary mt-4">← Назад к списку</a>
 {% endblock %}
