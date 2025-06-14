@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django import forms
 from .forms import RatingForm, CommentForm
 from django.db.models import Avg
-
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import os
 
 
 class WorkForm(forms.ModelForm):
@@ -99,3 +103,46 @@ def work_list_view(request):
         'author_query': author_query,
         'work_model': Work,
     })
+
+
+@login_required
+def export_work_pdf(request, work_id):
+    work = get_object_or_404(Work, id=work_id)
+
+    # Создаём HTTP-ответ как PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{work.title}.pdf"'
+
+    # Регистрируем шрифт с поддержкой кириллицы
+    font_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fonts', 'DejaVuSans.ttf')
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+
+    # Начинаем PDF-документ
+    p = canvas.Canvas(response)
+    y = 800  # начальная координата
+
+    p.setFont("DejaVuSans", 16)
+    p.drawString(100, y, work.title)
+    y -= 30
+
+    p.setFont("DejaVuSans", 12)
+    p.drawString(100, y, f"Автор: {work.author.username}")
+    y -= 20
+    p.drawString(100, y, f"Жанр: {work.get_genre_display()}")
+    y -= 20
+    p.drawString(100, y, f"Дата публикации: {work.published_date.strftime('%d.%m.%Y %H:%M')}")
+    y -= 40
+
+    # Контент произведения — построчно
+    content_lines = work.content.split('\n')
+    for line in content_lines:
+        if y < 50:
+            p.showPage()
+            p.setFont("DejaVuSans", 12)
+            y = 800
+        p.drawString(100, y, line.strip())
+        y -= 20
+
+    p.showPage()
+    p.save()
+    return response

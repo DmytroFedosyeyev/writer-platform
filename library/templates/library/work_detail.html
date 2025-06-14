@@ -64,4 +64,6 @@
 
 <!-- Назад -->
 <a href="{% url 'work_list' %}" class="btn btn-secondary mt-4">← Назад к списку</a>
+<a href="{% url 'export_work_pdf' work.id %}" class="btn btn-outline-secondary mt-3">📄 Скачать PDF</a>
+
 {% endblock %}
