@@ -75,7 +75,7 @@ def work_detail_view(request, work_id):
     })
 
 
-@login_required
+#@login_required
 def work_list_view(request):
     title_query = request.GET.get('title', '')
     genre_filter = request.GET.get('genre', '')
@@ -146,3 +146,7 @@ def export_work_pdf(request, work_id):
     p.showPage()
     p.save()
     return response
+
+
+def home_view(request):
+    return render(request, 'home.html')
