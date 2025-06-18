@@ -3,12 +3,66 @@
 {% block title %}Личный кабинет{% endblock %}
 
 {% block content %}
-<h2>Личный кабинет {{ user.username }}</h2>
+<h2>Личный кабинет пользователя</h2>
 <p>Добро пожаловать в ваш личный кабинет!</p>
-{% if user.is_authenticated %}
-    <p>Вы вошли как {{ user.username }}.</p>
-    <a href="{% url 'work_list' %}" class="btn primary">Посмотреть произведения</a>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<p><strong>Логин:</strong> {{ user.username }}</p>
+<p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
+
+{% if user == request.user %}
+    <h3>Редактировать данные</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_first_name">Имя</label>
+            <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="id_last_name">Фамилия</label>
+            <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+
+    <h3>Ваши произведения</h3>
+    {% if user.work_set.all %}
+        <ul>
+            {% for work in user.work_set.all %}
+                <li>{{ work.title }} -
+                    <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a>
+                    <a href="{% url 'edit_work' work.id %}" class="btn btn-secondary">Редактировать</a>
+                </li>
+            {% empty %}
+                <p>У вас нет произведений.</p>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас нет произведений.</p>
+    {% endif %}
+    <a href="{% url 'create_work' %}" class="btn btn-primary">Добавить произведение</a>
 {% else %}
-    <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'signup' %}">зарегистрируйтесь</a>.</p>
+    <h3>Произведения автора</h3>
+    {% if user.work_set.all %}
+        <ul>
+            {% for work in user.work_set.all %}
+                <li>{{ work.title }} - <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a></li>
+            {% empty %}
+                <p>У автора нет произведений.</p>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У автора нет произведений.</p>
+    {% endif %}
+{% endif %}
+
+<a href="{% url 'user_home' %}" class="btn btn-secondary">Вернуться в свой кабинет</a>
+{% if user == request.user %}
+    <a href="{% url 'logout' %}" class="btn btn-secondary">Выйти</a>
 {% endif %}
 {% endblock %}
