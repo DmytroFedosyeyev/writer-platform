@@ -14,6 +14,6 @@ def signup_view(request):
 
 from django.contrib.auth.decorators import login_required
 
-@login_required
+# @login_required
 def home_view(request):
-    return render(request, 'home.html')
+    return render(request, 'users/user_home.html')

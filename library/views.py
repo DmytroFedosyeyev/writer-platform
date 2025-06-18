@@ -58,6 +58,8 @@ def work_detail_view(request, work_id):
                 comment.work = work
                 comment.save()
                 return redirect('work_detail', work_id=work.id)
+            else:
+                print(comment_form.errors)  # Отладка ошибок
     else:
         rating_form = RatingForm(instance=user_rating)
         comment_form = CommentForm()
@@ -68,7 +70,7 @@ def work_detail_view(request, work_id):
     return render(request, 'library/work_detail.html', {
         'work': work,
         'comments': comments,
-        'form': comment_form,
+        'comment_form': comment_form,  # Исправлено на 'comment_form' для консистентности
         'rating_form': rating_form,
         'average_rating': average_rating,
         'user_rating': user_rating,

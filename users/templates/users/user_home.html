@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<h2>Личный кабинет {{ user.username }}</h2>
+<p>Добро пожаловать в ваш личный кабинет!</p>
+{% if user.is_authenticated %}
+    <p>Вы вошли как {{ user.username }}.</p>
+    <a href="{% url 'work_list' %}" class="btn primary">Посмотреть произведения</a>
+{% else %}
+    <p>Пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'signup' %}">зарегистрируйтесь</a>.</p>
+{% endif %}
+{% endblock %}
