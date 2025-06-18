@@ -1,4 +1,4 @@
-from .models import Rating, Comment
+from .models import Rating, Comment, Work
 from django import forms
 
 class RatingForm(forms.ModelForm):
@@ -30,4 +30,28 @@ class CommentForm(forms.ModelForm):
         }
         labels = {
             'text': 'Комментарий'
+        }
+
+class WorkForm(forms.ModelForm):
+    class Meta:
+        model = Work
+        fields = ['title', 'genre', 'content']
+        labels = {
+            'title': 'Название',
+            'genre': 'Жанр',
+            'content': 'Текст произведения',
+        }
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Введите название произведения'
+            }),
+            'genre': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 10,
+                'placeholder': 'Введите текст произведения'
+            }),
         }

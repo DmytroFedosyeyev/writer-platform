@@ -1,37 +1,32 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}WriterPlatform — платформа для писателей{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="row align-items-center">
-    <div class="col-md-6 mb-4">
-      <h1 class="display-4 fw-bold">WriterPlatform</h1>
-      <p class="lead mt-3">
-        Онлайн-платформа для авторов и читателей. Публикуйте стихи, рассказы, повести,
-        читайте чужие произведения, оставляйте комментарии и оценки.
-      </p>
-      <p>
-        Здесь каждый может поделиться творчеством. Не важно, новичок вы или опытный писатель —
-        у нас всем найдётся место.
-      </p>
-
-      {% if user.is_authenticated %}
-        <div class="d-flex gap-2 mt-4">
-          <a href="{% url 'work_list' %}" class="btn btn-primary btn-lg">📚 Читать</a>
-          <a href="{% url 'create_work' %}" class="btn btn-outline-success btn-lg">✍️ Написать</a>
+<div class="home-container">
+    <div class="home-text">
+        <h1>WriterPlatform</h1>
+        <p class="lead">
+            Онлайн-платформа для авторов и читателей. Публикуйте стихи, рассказы, повести,
+            читайте чужие произведения, оставляйте комментарии и оценки.
+        </p>
+        <p>
+            Здесь каждый может поделиться творчеством. Не важно, новичок вы или опытный писатель —
+            у нас всем найдётся место.
+        </p>
+        <div class="buttons">
+            {% if user.is_authenticated %}
+                <a href="{% url 'work_list' %}" class="btn primary">Читать</a>
+                <a href="{% url 'create_work' %}" class="btn outline">Написать</a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn primary">Зарегистрироваться</a>
+                <a href="{% url 'login' %}" class="btn outline">Войти</a>
+            {% endif %}
         </div>
-      {% else %}
-        <div class="d-flex gap-2 mt-4">
-          <a href="{% url 'signup' %}" class="btn btn-success btn-lg">Зарегистрироваться</a>
-          <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">Войти</a>
-        </div>
-      {% endif %}
     </div>
-
-    <div class="col-md-6 text-center">
-      <img src="https://img.freepik.com/free-vector/flat-people-reading-books-illustration_52683-54023.jpg" alt="Reading illustration" class="img-fluid rounded shadow">
+    <div class="home-image">
+        <img src="{% static 'images/open-book.jpg' %}" alt="Открытая книга">
     </div>
-  </div>
 </div>
 {% endblock %}
