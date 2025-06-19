@@ -13,43 +13,52 @@
     <hr>
     <div class="content">{{ work.content|linebreaks }}</div>
 
-    <!-- Рейтинг -->
-    <div class="rating-section">
-        <h4>Ваша оценка</h4>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                {{ rating_form.score.label_tag }}
-                <input type="number" name="score" min="1" max="5" id="id_score"
-                       class="score-input" value="{{ rating_form.score.value|default:'' }}">
-                {% for error in rating_form.score.errors %}
-                    <div class="error">{{ error }}</div>
-                {% endfor %}
-            </div>
-            <button type="submit" name="rate_submit" class="btn primary">Отправить</button>
-        </form>
-    </div>
+    <!-- Сообщение для неавторизованных пользователей -->
+    {% if show_auth_message %}
+        <p class="text-center text-gray-600 mt-4">Чтобы оставлять комментарии или оценки, надо зарегистрироваться на сайте.</p>
+    {% else %}
+        <!-- Рейтинг -->
+        <div class="rating-section">
+            <h4>Ваша оценка</h4>
+            {% if rating_form %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ rating_form.score.label_tag }}
+                        <input type="number" name="score" min="1" max="5" id="id_score"
+                               class="score-input" value="{{ rating_form.score.value|default:'' }}">
+                        {% for error in rating_form.score.errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" name="rate_submit" class="btn primary">Отправить</button>
+                </form>
+            {% endif %}
+        </div>
 
-    <!-- Комментарии -->
-    <div class="comment-section">
-        <h4>Оставить комментарий</h4>
-        <form method="post" style="text-align: left;">
-            {% csrf_token %}
-            <input type="hidden" name="comment_submit" value="1">
-            <div class="form-group-wrapper">
-                <div class="form-group" style="padding: 0.5rem;">
-                    {{ comment_form.text.label_tag }}
-                    {{ comment_form.text }}
-                    {% for error in comment_form.text.errors %}
-                        <div class="error" style="border: 1px solid purple;">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="button-container">
-                <button type="submit" class="btn primary">Отправить</button>
-            </div>
-        </form>
-    </div>
+        <!-- Комментарии -->
+        <div class="comment-section">
+            <h4>Оставить комментарий</h4>
+            {% if comment_form %}
+                <form method="post" style="text-align: left;">
+                    {% csrf_token %}
+                    <input type="hidden" name="comment_submit" value="1">
+                    <div class="form-group-wrapper">
+                        <div class="form-group" style="padding: 0.5rem;">
+                            {{ comment_form.text.label_tag }}
+                            {{ comment_form.text }}
+                            {% for error in comment_form.text.errors %}
+                                <div class="error" style="border: 1px solid purple;">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn primary">Отправить</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <!-- Список комментариев -->
     <div class="mt-4">

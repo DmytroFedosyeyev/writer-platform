@@ -1,3 +1,4 @@
+# library/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Work, Rating
 from django.contrib.auth.decorators import login_required
@@ -25,38 +26,43 @@ def create_work_view(request):
         form = WorkForm()
     return render(request, 'library/create_work.html', {'form': form})
 
-@login_required
 def work_detail_view(request, work_id):
     work = get_object_or_404(Work, id=work_id)
     comments = work.comments.all().order_by('-created_at')
 
-    # Получаем оценку пользователя (если уже оценивал)
-    user_rating = Rating.objects.filter(user=request.user, work=work).first()
+    # Инициализация форм и данных
+    rating_form = None
+    comment_form = None
+    show_auth_message = not request.user.is_authenticated
+    user_rating = None
 
-    if request.method == 'POST':
-        if 'rate_submit' in request.POST:
-            rating_form = RatingForm(request.POST, instance=user_rating)
-            comment_form = CommentForm()
-            if rating_form.is_valid():
-                rating = rating_form.save(commit=False)
-                rating.user = request.user
-                rating.work = work
-                rating.save()
-                return redirect('work_detail', work_id=work.id)
-        elif 'comment_submit' in request.POST:
-            comment_form = CommentForm(request.POST)
-            rating_form = RatingForm(instance=user_rating)
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.user = request.user
-                comment.work = work
-                comment.save()
-                return redirect('work_detail', work_id=work.id)
-            else:
-                print(comment_form.errors)  # Отладка ошибок
-    else:
+    if request.user.is_authenticated:
+        # Получаем оценку пользователя (если уже оценивал)
+        user_rating = Rating.objects.filter(user=request.user, work=work).first()
+
+        # Инициализация форм для авторизованных пользователей
         rating_form = RatingForm(instance=user_rating)
         comment_form = CommentForm()
+
+        if request.method == 'POST':
+            if 'rate_submit' in request.POST:
+                rating_form = RatingForm(request.POST, instance=user_rating)
+                if rating_form.is_valid():
+                    rating = rating_form.save(commit=False)
+                    rating.user = request.user
+                    rating.work = work
+                    rating.save()
+                    return redirect('work_detail', work_id=work.id)
+            elif 'comment_submit' in request.POST:
+                comment_form = CommentForm(request.POST)
+                if comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.user = request.user
+                    comment.work = work
+                    comment.save()
+                    return redirect('work_detail', work_id=work.id)
+                else:
+                    print(comment_form.errors)  # Отладка ошибок
 
     # Средняя оценка
     average_rating = work.ratings.aggregate(Avg('score'))['score__avg']
@@ -68,6 +74,7 @@ def work_detail_view(request, work_id):
         'rating_form': rating_form,
         'average_rating': average_rating,
         'user_rating': user_rating,
+        'show_auth_message': show_auth_message,
     })
 
 #@login_required
@@ -142,7 +149,8 @@ def export_work_pdf(request, work_id):
     return response
 
 def home_view(request):
-    return render(request, 'home.html')
+    latest_works = Work.objects.all().order_by('-published_date')[:5]
+    return render(request, 'home.html', {'latest_works': latest_works})
 
 @login_required
 def edit_work_view(request, work_id):
@@ -155,7 +163,6 @@ def edit_work_view(request, work_id):
     else:
         form = WorkForm(instance=work)
     return render(request, 'library/edit_work.html', {'form': form})
-
 
 class WorkDeleteView(DeleteView):
     model = Work

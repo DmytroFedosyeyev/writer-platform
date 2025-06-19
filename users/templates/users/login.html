@@ -1,12 +1,31 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<h2>Вход</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Войти</button>
-</form>
+<div class="form-container">
+    <h2 class="section-title text-center">Вход</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn primary w-full">Войти</button>
+    </form>
+
+    <div class="mt-4 text-center">
+        <p>Ещё не зарегистрированы? <a href="{% url 'signup' %}" class="text-blue-500 hover:underline">Зарегистрироваться</a></p>
+    </div>
+</div>
 {% endblock %}

@@ -4,7 +4,7 @@
 {% block title %}Все произведения{% endblock %}
 
 {% block content %}
-<p>Авторизован: {{ user.is_authenticated }} (Пользователь: {{ user.username|default:"Гость" }})</p>
+<p>Авторизован: (Пользователь: {{ user.username|default:"Гость" }})</p>
 <h2 class="section-title">Произведения</h2>
 
 <div class="form-container mb-5">
