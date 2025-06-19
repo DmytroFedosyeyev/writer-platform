@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }} - Профиль{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Профиль пользователя: {{ user.username }}</h2>
+
+  <p><strong>Логин:</strong> {{ user.username }}</p>
+  <p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
+  <p><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+
+  <h3 class="mt-6 text-lg font-semibold">Произведения автора</h3>
+  {% if user.work_set.all %}
+    <ul class="list-disc pl-5 mt-2">
+      {% for work in user.work_set.all %}
+        <li>{{ work.title }} - <a href="{% url 'work_detail' work.id %}" class="text-blue-500 hover:underline">Просмотр</a></li>
+      {% empty %}
+        <p>У автора нет произведений.</p>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>У автора нет произведений.</p>
+  {% endif %}
+</div>
+{% endblock %}

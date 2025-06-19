@@ -1,21 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Work, Rating
 from django.contrib.auth.decorators import login_required
-from django import forms
-from .forms import RatingForm, CommentForm
+from .forms import RatingForm, CommentForm, WorkForm  # Импортируем WorkForm отсюда
 from django.db.models import Avg
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import os
-
-
-class WorkForm(forms.ModelForm):
-    class Meta:
-        model = Work
-        fields = ['title', 'genre', 'content']
-
+from django.views.generic.edit import DeleteView
+from django.urls import reverse_lazy
+from django.core.exceptions import PermissionDenied
 
 @login_required
 def create_work_view(request):
@@ -29,7 +24,6 @@ def create_work_view(request):
     else:
         form = WorkForm()
     return render(request, 'library/create_work.html', {'form': form})
-
 
 @login_required
 def work_detail_view(request, work_id):
@@ -58,6 +52,8 @@ def work_detail_view(request, work_id):
                 comment.work = work
                 comment.save()
                 return redirect('work_detail', work_id=work.id)
+            else:
+                print(comment_form.errors)  # Отладка ошибок
     else:
         rating_form = RatingForm(instance=user_rating)
         comment_form = CommentForm()
@@ -68,12 +64,11 @@ def work_detail_view(request, work_id):
     return render(request, 'library/work_detail.html', {
         'work': work,
         'comments': comments,
-        'form': comment_form,
+        'comment_form': comment_form,
         'rating_form': rating_form,
         'average_rating': average_rating,
         'user_rating': user_rating,
     })
-
 
 #@login_required
 def work_list_view(request):
@@ -103,7 +98,6 @@ def work_list_view(request):
         'author_query': author_query,
         'work_model': Work,
     })
-
 
 @login_required
 def export_work_pdf(request, work_id):
@@ -147,6 +141,29 @@ def export_work_pdf(request, work_id):
     p.save()
     return response
 
-
 def home_view(request):
     return render(request, 'home.html')
+
+@login_required
+def edit_work_view(request, work_id):
+    work = get_object_or_404(Work, id=work_id, author=request.user)
+    if request.method == 'POST':
+        form = WorkForm(request.POST, instance=work)
+        if form.is_valid():
+            form.save()
+            return redirect('work_detail', work_id=work.id)
+    else:
+        form = WorkForm(instance=work)
+    return render(request, 'library/edit_work.html', {'form': form})
+
+
+class WorkDeleteView(DeleteView):
+    model = Work
+    template_name = 'library/work_confirm_delete.html'
+    success_url = reverse_lazy('work_list')
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.author != self.request.user:
+            raise PermissionDenied("У вас нет прав для удаления этого произведения.")
+        return obj

@@ -3,10 +3,44 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<h2>Регистрация</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-</form>
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Регистрация</h2>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_username" class="block text-sm font-medium text-gray-700">Логин</label>
+      <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" class="mt-1 block short-input p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Макс. 150 символов, используйте буквы, цифры, @/./+/-/_">
+      <small class="text-xs text-gray-500">Логин должен быть уникальным и не превышать 150 символов.</small>
+      {% if form.username.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.username.errors|join:", " }}</p>
+      {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="id_email" class="block text-sm font-medium text-gray-700">Email</label>
+      <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" class="mt-1 block short-input p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Введите действующий email">
+      {% if form.email.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.email.errors|join:", " }}</p>
+      {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="id_password1" class="block text-sm font-medium text-gray-700">Пароль</label>
+      <input type="password" name="password1" id="id_password1" class="mt-1 block short-input p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Минимум 8 символов">
+      <small class="text-xs text-gray-500">Пароль должен содержать минимум 8 символов. Рекомендуется использовать буквы, цифры и символы.</small>
+      {% if form.password1.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.password1.errors|join:", " }}</p>
+      {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="id_password2" class="block text-sm font-medium text-gray-700">Подтверждение пароля</label>
+      <input type="password" name="password2" id="id_password2" class="mt-1 block short-input p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Повторите пароль">
+      {% if form.password2.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ form.password2.errors|join:", " }}</p>
+      {% endif %}
+    </div>
+    <button type="submit" class="btn primary register-btn">Зарегистрироваться</button>
+  </form>
+  {% if form.non_field_errors %}
+    <p class="mt-2 text-sm text-red-600 text-center">{{ form.non_field_errors|join:", " }}</p>
+  {% endif %}
+</div>
 {% endblock %}

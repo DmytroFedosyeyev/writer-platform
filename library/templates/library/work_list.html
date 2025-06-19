@@ -1,47 +1,49 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Все произведения{% endblock %}
 
 {% block content %}
-<h2>Все опубликованные произведения</h2>
+<p>Авторизован: {{ user.is_authenticated }} (Пользователь: {{ user.username|default:"Гость" }})</p>
+<h2 class="section-title">Произведения</h2>
 
-<!-- Форма поиска и фильтрации -->
-<h3>Поиск и фильтрация</h3>
-<form method="get" class="mb-4" style="max-width: 500px;">
-  <div class="mb-2">
-    <label>Название:</label>
-    <input type="text" name="title" value="{{ title_query }}" class="form-control" placeholder="Введите часть названия">
-  </div>
+<div class="form-container mb-5">
+    <h3 class="mb-3">Поиск и фильтрация</h3>
+    <form method="get">
+        <div class="form-group mb-3">
+            <label>Название:</label>
+            <input type="text" name="title" value="{{ title_query }}" class="form-control" placeholder="Введите часть названия">
+        </div>
 
-  <div class="mb-2">
-    <label>Жанр:</label>
-    <select name="genre" class="form-select">
-      <option value="">Все жанры</option>
-      {% for value, label in works.model.GENRE_CHOICES %}
-        <option value="{{ value }}" {% if value == genre_filter %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </div>
+        <div class="form-group mb-3">
+            <label>Жанр:</label>
+            <select name="genre" class="form-control">
+                <option value="">Все жанры</option>
+                {% for value, label in works.model.GENRE_CHOICES %}
+                    <option value="{{ value }}" {% if value == genre_filter %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-  <div class="mb-2">
-    <label>Автор:</label>
-    <input type="text" name="author" value="{{ author_query }}" class="form-control" placeholder="Введите имя автора">
-  </div>
+        <div class="form-group mb-3">
+            <label>Автор:</label>
+            <input type="text" name="author" value="{{ author_query }}" class="form-control" placeholder="Введите имя автора">
+        </div>
 
-  <button type="submit" class="btn btn-primary">Найти</button>
-</form>
+        <button type="submit" class="btn primary">Найти</button>
+    </form>
+</div>
 
-<!-- Список произведений -->
-{% for work in works %}
-  <div class="mb-3 p-3 border rounded">
-    <h4>{{ work.title }}</h4>
-    <p><strong>Автор:</strong> {{ work.author.username }}</p>
-    <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
-    <p><strong>Дата публикации:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
-    <a href="{% url 'work_detail' work.id %}" class="btn btn-outline-primary">Читать полностью</a>
-  </div>
-{% empty %}
-  <p>Пока нет ни одного произведения.</p>
-{% endfor %}
-
+<div class="work-list">
+    {% for work in works %}
+        <div class="card mb-4">
+            <h4>{{ work.title }}</h4>
+            <p><strong>Автор:</strong> <a href="{% url 'user_profile' work.author.username %}">{{ work.author.username }}</a></p>
+            <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
+            <p><strong>Дата публикации:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
+            <a href="{% url 'work_detail' work.id %}" class="btn outline">Читать полностью</a>
+        </div>
+    {% empty %}
+    {% endfor %}
+</div>
 {% endblock %}
