@@ -44,14 +44,17 @@ class WorkForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Введите название произведения'
+                'placeholder': 'Введите название произведения',
+                'style': 'width: 100%; height: 40px; font-size: 16px;'  # Увеличенная высота и ширина
             }),
             'genre': forms.Select(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'style': 'width: 50%; height: 50px; font-size: 16px;'  # Увеличенная высота
             }),
             'content': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 10,
-                'placeholder': 'Введите текст произведения'
+                'rows': 15,  # Увеличено количество строк для текста
+                'placeholder': 'Введите текст произведения',
+                'style': 'width: 100%; height: 400px; font-size: 16px;'  # Увеличенная высота и ширина
             }),
         }

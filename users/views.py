@@ -36,4 +36,9 @@ def home_view(request):
 
 def profile_view(request, username):
     user = User.objects.get(username=username)
-    return render(request, 'users/user_home.html', {'user': user})
+    if request.user.is_authenticated and request.user.username == username:
+        # Если авторизованный пользователь просматривает свой профиль
+        return render(request, 'users/user_home.html', {'user': user})
+    else:
+        # Для гостей или просмотра чужого профиля
+        return render(request, 'users/profile.html', {'user': user})

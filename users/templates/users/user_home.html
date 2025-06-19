@@ -37,6 +37,10 @@
                 <li>{{ work.title }} -
                     <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a>
                     <a href="{% url 'edit_work' work.id %}" class="btn btn-secondary">Редактировать</a>
+                    <form method="post" action="{% url 'work_delete' work.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить произведение {{ work.title }}?');">Удалить</button>
+                    </form>
                 </li>
             {% empty %}
                 <p>У вас нет произведений.</p>
@@ -61,8 +65,6 @@
     {% endif %}
 {% endif %}
 
-<a href="{% url 'user_home' %}" class="btn btn-secondary">Вернуться в свой кабинет</a>
 {% if user == request.user %}
-    <a href="{% url 'logout' %}" class="btn btn-secondary">Выйти</a>
 {% endif %}
 {% endblock %}
