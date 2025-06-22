@@ -5,11 +5,12 @@
 
 {% block content %}
 <div class="form-container">
-    <h2 class="section-title text-center">Вход</h2>
+    <h2 class="section-title text-center mb-4">Вход</h2>
+
     <form method="post">
         {% csrf_token %}
         {% for field in form %}
-            <div class="form-group">
+            <div class="form-group mb-3">
                 {{ field.label_tag }}
                 {{ field }}
                 {% if field.errors %}
@@ -21,7 +22,14 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <button type="submit" class="btn primary w-full">Войти</button>
+
+        <div class="text-right mb-3">
+            <a href="{% url 'password_reset' %}" class="text-sm text-blue-500 hover:underline">Забыли пароль?</a>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn primary w-full">Войти</button>
+        </div>
     </form>
 
     <div class="mt-4 text-center">
