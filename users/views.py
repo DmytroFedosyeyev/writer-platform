@@ -29,6 +29,7 @@ def home_view(request):
         user = request.user
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)  # Добавлено поле email
         user.save()
         messages.success(request, 'Профиль обновлён!')
         return redirect('user_home')

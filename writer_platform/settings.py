@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'library',
+    'ckeditor',
 ]
 
 MIDDLEWARE = [
@@ -142,3 +143,6 @@ LOGOUT_REDIRECT_URL = 'home'
 SESSION_COOKIE_PATH = '/'
 SESSION_COOKIE_SECURE = False  # Для разработки
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

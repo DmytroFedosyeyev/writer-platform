@@ -10,8 +10,31 @@
     <p class="meta"><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
     <p class="meta"><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
 
+    {% if average_rating is not None %}
+        <p class="meta"><strong>Средняя оценка:</strong> {{ average_rating|floatformat:2 }}/100</p>
+    {% else %}
+        <p class="meta">Ещё нет оценок.</p>
+    {% endif %}
+
     <hr>
-    <div class="content">{{ work.content|linebreaks }}</div>
+        <div class="content">
+            {{ work.content|safe }}
+        </div>
+
+    <!-- Навигация по страницам текста с увеличенным отступом -->
+    {% if content_page.has_other_pages %}
+        <div class="pagination mt-4" style="margin-top: 1.5rem;">
+            {% if content_page.has_previous %}
+                <a href="?page={{ content_page.previous_page_number }}" class="btn secondary">← Предыдущая</a>
+            {% endif %}
+            {% for num in content_page.paginator.page_range %}
+                <a href="?page={{ num }}" class="btn {% if content_page.number == num %}primary{% else %}outline{% endif %}">{{ num }}</a>
+            {% endfor %}
+            {% if content_page.has_next %}
+                <a href="?page={{ content_page.next_page_number }}" class="btn secondary">Следующая →</a>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <!-- Сообщение для неавторизованных пользователей -->
     {% if show_auth_message %}
@@ -19,20 +42,18 @@
     {% else %}
         <!-- Рейтинг -->
         <div class="rating-section">
-            <h4>Ваша оценка</h4>
-            {% if rating_form %}
-                <form method="post">
+            {% if rating_form and not has_rated %}
+                <form method="post" style="display: inline-flex; align-items: center;">
                     {% csrf_token %}
-                    <div class="form-group">
-                        {{ rating_form.score.label_tag }}
-                        <input type="number" name="score" min="1" max="5" id="id_score"
-                               class="score-input" value="{{ rating_form.score.value|default:'' }}">
-                        {% for error in rating_form.score.errors %}
-                            <div class="error">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    <button type="submit" name="rate_submit" class="btn primary">Отправить</button>
+                    <span style="margin-right: 1rem;">Оцените произведение от 0 до 100:</span>
+                    {{ rating_form.score }}
+                    <button type="submit" name="rate_submit" class="btn primary" style="margin-left: 1rem;">Отправить</button>
+                    {% for error in rating_form.score.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
                 </form>
+            {% elif has_rated %}
+                <p class="text-center text-gray-600 mt-4">Вы уже оценили это произведение.</p>
             {% endif %}
         </div>
 
