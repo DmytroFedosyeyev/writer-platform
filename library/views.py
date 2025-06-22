@@ -11,6 +11,8 @@ import os
 from django.views.generic.edit import DeleteView
 from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
+
 
 @login_required
 def create_work_view(request):
@@ -25,42 +27,50 @@ def create_work_view(request):
         form = WorkForm()
     return render(request, 'library/create_work.html', {'form': form})
 
-@login_required
 def work_detail_view(request, work_id):
     work = get_object_or_404(Work, id=work_id)
     comments = work.comments.all().order_by('-created_at')
 
-    # Получаем оценку пользователя (если уже оценивал)
-    user_rating = Rating.objects.filter(user=request.user, work=work).first()
+    # Инициализация форм и данных
+    rating_form = None
+    comment_form = None
+    show_auth_message = not request.user.is_authenticated
+    user_rating = None
+    has_rated = False
 
-    if request.method == 'POST':
-        if 'rate_submit' in request.POST:
-            rating_form = RatingForm(request.POST, instance=user_rating)
-            comment_form = CommentForm()
-            if rating_form.is_valid():
-                rating = rating_form.save(commit=False)
-                rating.user = request.user
-                rating.work = work
-                rating.save()
-                return redirect('work_detail', work_id=work.id)
-        elif 'comment_submit' in request.POST:
-            comment_form = CommentForm(request.POST)
-            rating_form = RatingForm(instance=user_rating)
-            if comment_form.is_valid():
-                comment = comment_form.save(commit=False)
-                comment.user = request.user
-                comment.work = work
-                comment.save()
-                return redirect('work_detail', work_id=work.id)
-            else:
-                print(comment_form.errors)  # Отладка ошибок
-    else:
-        rating_form = RatingForm(instance=user_rating)
+    if request.user.is_authenticated:
+        # Проверяем, оценивал ли пользователь
+        user_rating = Rating.objects.filter(user=request.user, work=work).first()
+        has_rated = user_rating is not None
+
+        # Инициализация форм для авторизованных пользователей
+        rating_form = RatingForm(instance=user_rating) if not has_rated else None
         comment_form = CommentForm()
+
+        if request.method == 'POST' and not has_rated:
+            if 'rate_submit' in request.POST:
+                rating_form = RatingForm(request.POST, instance=user_rating)
+                if rating_form.is_valid():
+                    rating = rating_form.save(commit=False)
+                    rating.user = request.user
+                    rating.work = work
+                    rating.save()
+                    return redirect('work_detail', work_id=work.id)
+            elif 'comment_submit' in request.POST:
+                comment_form = CommentForm(request.POST)
+                if comment_form.is_valid():
+                    comment = comment_form.save(commit=False)
+                    comment.user = request.user
+                    comment.work = work
+                    comment.save()
+                    return redirect('work_detail', work_id=work.id)
+                else:
+                    print(comment_form.errors)
 
     # Средняя оценка
     average_rating = work.ratings.aggregate(Avg('score'))['score__avg']
 
+    # Убираем пагинацию текста, передаём весь контент
     return render(request, 'library/work_detail.html', {
         'work': work,
         'comments': comments,
@@ -68,6 +78,9 @@ def work_detail_view(request, work_id):
         'rating_form': rating_form,
         'average_rating': average_rating,
         'user_rating': user_rating,
+        'show_auth_message': show_auth_message,
+        'content': work.content,  # Передаём весь текст без пагинации
+        'has_rated': has_rated,
     })
 
 #@login_required
@@ -91,8 +104,13 @@ def work_list_view(request):
         if author_query:
             works = works.filter(author__username__icontains=author_query)
 
+    # Пагинация
+    paginator = Paginator(works, 5)  # 5 работ на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'library/work_list.html', {
-        'works': works,
+        'works': page_obj,
         'title_query': title_query,
         'genre_filter': genre_filter,
         'author_query': author_query,
@@ -142,7 +160,8 @@ def export_work_pdf(request, work_id):
     return response
 
 def home_view(request):
-    return render(request, 'home.html')
+    latest_works = Work.objects.all().order_by('-published_date')[:5]
+    return render(request, 'home.html', {'latest_works': latest_works})
 
 @login_required
 def edit_work_view(request, work_id):
@@ -155,7 +174,6 @@ def edit_work_view(request, work_id):
     else:
         form = WorkForm(instance=work)
     return render(request, 'library/edit_work.html', {'form': form})
-
 
 class WorkDeleteView(DeleteView):
     model = Work

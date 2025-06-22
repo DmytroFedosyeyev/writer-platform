@@ -4,28 +4,28 @@
 {% block title %}Все произведения{% endblock %}
 
 {% block content %}
-<p>Авторизован: {{ user.is_authenticated }} (Пользователь: {{ user.username|default:"Гость" }})</p>
+<p>Авторизован: (Пользователь: {{ user.username|default:"Гость" }})</p>
 <h2 class="section-title">Произведения</h2>
 
-<div class="form-container mb-5">
+<div class="form-container" style="margin-bottom: 2rem;">
     <h3 class="mb-3">Поиск и фильтрация</h3>
     <form method="get">
-        <div class="form-group mb-3">
+        <div class="form-group" style="margin-bottom: 1rem;">
             <label>Название:</label>
             <input type="text" name="title" value="{{ title_query }}" class="form-control" placeholder="Введите часть названия">
         </div>
 
-        <div class="form-group mb-3">
+        <div class="form-group" style="margin-bottom: 1rem;">
             <label>Жанр:</label>
             <select name="genre" class="form-control">
                 <option value="">Все жанры</option>
-                {% for value, label in works.model.GENRE_CHOICES %}
+                {% for value, label in work_model.GENRE_CHOICES %}
                     <option value="{{ value }}" {% if value == genre_filter %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <div class="form-group mb-3">
+        <div class="form-group" style="margin-bottom: 1rem;">
             <label>Автор:</label>
             <input type="text" name="author" value="{{ author_query }}" class="form-control" placeholder="Введите имя автора">
         </div>
@@ -36,7 +36,7 @@
 
 <div class="work-list">
     {% for work in works %}
-        <div class="card mb-4">
+        <div class="card" style="margin-bottom: 1.5rem;">
             <h4>{{ work.title }}</h4>
             <p><strong>Автор:</strong> <a href="{% url 'user_profile' work.author.username %}">{{ work.author.username }}</a></p>
             <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
@@ -44,6 +44,24 @@
             <a href="{% url 'work_detail' work.id %}" class="btn outline">Читать полностью</a>
         </div>
     {% empty %}
+        <p>Ничего не найдено.</p>
     {% endfor %}
+
+    <!-- Навигация по страницам -->
+    {% if works.has_other_pages %}
+        <div class="pagination" style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+            {% if works.has_previous %}
+                <a href="?page={{ works.previous_page_number }}{% if title_query %}&title={{ title_query|urlencode }}{% endif %}{% if genre_filter %}&genre={{ genre_filter|urlencode }}{% endif %}{% if author_query %}&author={{ author_query|urlencode }}{% endif %}" class="btn secondary">← Предыдущая</a>
+            {% endif %}
+            {% for num in works.paginator.page_range %}
+                {% if num >= works.number|add:-2 and num <= works.number|add:2 %}
+                    <a href="?page={{ num }}{% if title_query %}&title={{ title_query|urlencode }}{% endif %}{% if genre_filter %}&genre={{ genre_filter|urlencode }}{% endif %}{% if author_query %}&author={{ author_query|urlencode }}{% endif %}" class="btn {% if works.number == num %}primary{% else %}outline{% endif %}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if works.has_next %}
+                <a href="?page={{ works.next_page_number }}{% if title_query %}&title={{ title_query|urlencode }}{% endif %}{% if genre_filter %}&genre={{ genre_filter|urlencode }}{% endif %}{% if author_query %}&author={{ author_query|urlencode }}{% endif %}" class="btn secondary">Следующая →</a>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

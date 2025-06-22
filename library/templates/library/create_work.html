@@ -5,11 +5,19 @@
 
 {% block content %}
 <div class="form-container">
-    <h2 class="section-title">Новое произведение</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn primary mt-3">Опубликовать</button>
-    </form>
+    <h2 class="section-title text-center mb-4">Новое произведение</h2>
+    <div class="card p-3">
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.media }}  {# Подключаем скрипты CKEditor #}
+            {{ form.as_p }}
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Опубликовать</button>
+            </div>
+        </form>
+    </div>
+    <p class="text-muted text-center mt-2">Вставьте текст или введите его вручную. Форматирование сохраняется.</p>
 </div>
 {% endblock %}

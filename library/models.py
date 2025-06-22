@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
+from ckeditor.fields import RichTextField
 
 
 class Work(models.Model):
@@ -15,7 +17,7 @@ class Work(models.Model):
 
     title = models.CharField(max_length=255)
     genre = models.CharField(max_length=50, choices=GENRE_CHOICES)
-    content = models.TextField()
+    content = RichTextField()
     published_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -36,7 +38,7 @@ class Comment(models.Model):
 class Rating(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     work = models.ForeignKey(Work, on_delete=models.CASCADE, related_name='ratings')
-    score = models.PositiveIntegerField()
+    score = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])  # Изменено с 0-5 на 0-100
 
     class Meta:
         unique_together = ('user', 'work')  # Один пользователь - одна оценка на произведение

@@ -252,7 +252,8 @@ body {
 }
 
 .form-group input[name="first_name"],
-.form-group input[name="last_name"] {
+.form-group input[name="last_name"],
+.form-group input[name="email"]{
   max-width: 500px; /* Ограничивает ширину полей "Имя" и "Фамилия" */
 }
 
@@ -555,4 +556,18 @@ body {
   color: #e74c3c;
   font-size: 0.9rem;
   margin-top: 0.25rem;
+}
+
+/* Стили для ссылок действий в профиле */
+.profile-action {
+    color: #34495e; /* Базовый цвет текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    font-weight: 700;
+    margin-right: 0.5rem; /* Отступ между действиями */
+    transition: color 0.3s ease;
+}
+
+.profile-action:hover {
+    color: #f1c40f; /* Жёлтый цвет при наведении, как в .main-nav a:hover */
+    text-decoration: none; /* Без подчёркивания при наведении */
 }
