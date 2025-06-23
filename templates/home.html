@@ -39,7 +39,11 @@
                 <li class="mt-2">
                     <a href="{% url 'work_detail' work.id %}" class="text-blue-500 hover:underline">{{ work.title }}</a>
                     <span> Автор: </span>
-                    <a href="{% url 'user_profile' work.author.username %}" class="text-blue-500 hover:underline">{{ work.author.username }}</a>
+                    {% if work.author %}
+                        <a href="{% url 'user_profile' work.author.username %}" class="text-blue-500 hover:underline">{{ work.author.username }}</a>
+                    {% else %}
+                        <span class="text-gray-500">Автор удалён</span>
+                    {% endif %}
                 </li>
             {% empty %}
                 <p>Пока нет добавленных произведений.</p>

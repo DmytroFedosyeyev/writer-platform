@@ -3,7 +3,7 @@ import logging
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
@@ -53,3 +53,17 @@ def profile_view(request, username):
     else:
         # Для гостей или просмотра чужого профиля
         return render(request, 'users/profile.html', {'user': user})
+
+
+@login_required
+def delete_account_view(request):
+    logger.info(f"Запрос на удаление аккаунта пользователя {request.user.username}")
+    if request.method == 'POST':
+        user = request.user
+        username = user.username
+        logout(request)
+        user.delete()
+        logger.info(f"Аккаунт пользователя {username} успешно удалён")
+        messages.success(request, 'Ваш аккаунт удалён. До свидания!')
+        return redirect('home')
+    return render(request, 'users/delete_account.html')

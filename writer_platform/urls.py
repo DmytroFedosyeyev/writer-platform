@@ -19,12 +19,15 @@ from django.urls import path, include
 from library.views import home_view
 from django.conf import settings
 from django.conf.urls.static import static
+from users import views as users_views
+
 
 urlpatterns = [
     path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('works/', include('library.urls')),
+    path('delete-account/', users_views.delete_account_view, name='delete_account'),
 ]
 
 if settings.DEBUG:
