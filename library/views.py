@@ -89,20 +89,18 @@ def work_list_view(request):
     genre_filter = request.GET.get('genre', '')
     author_query = request.GET.get('author', '')
 
-    works = Work.objects.none()  # По умолчанию пустой список
+    # Базовый набор — все работы, если фильтры пустые
+    works = Work.objects.all().order_by('-published_date')
 
-    # Если есть хотя бы один фильтр, применяем фильтрацию
-    if title_query or genre_filter or author_query:
-        works = Work.objects.all().order_by('-published_date')
+    # Применяем фильтры, если они заданы
+    if title_query:
+        works = works.filter(title__icontains=title_query)
 
-        if title_query:
-            works = works.filter(title__icontains=title_query)
+    if genre_filter:
+        works = works.filter(genre=genre_filter)
 
-        if genre_filter:
-            works = works.filter(genre=genre_filter)
-
-        if author_query:
-            works = works.filter(author__username__icontains=author_query)
+    if author_query:
+        works = works.filter(author__username__icontains=author_query)
 
     # Пагинация
     paginator = Paginator(works, 5)  # 5 работ на страницу
