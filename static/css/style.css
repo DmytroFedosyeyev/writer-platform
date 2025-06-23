@@ -536,9 +536,8 @@ body {
 
 /* Новый контейнер для кнопки */
 .comment-section .button-container {
-    margin-top: 2rem;
-    text-align: left; /* Выравнивание по левому краю */
-    display: block; /* Гарантируем блочное поведение */
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
 }
 
 /* Кнопка "Назад к списку" с отступом сверху */
@@ -570,4 +569,30 @@ body {
 .profile-action:hover {
     color: #f1c40f; /* Жёлтый цвет при наведении, как в .main-nav a:hover */
     text-decoration: none; /* Без подчёркивания при наведении */
+}
+
+/* Стили для формы оценки */
+.rating-section form {
+    padding: 0.5rem; /* Добавляем небольшой общий отступ внутри формы */
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.rating-section form span {
+    margin-right: 1rem; /* Сохраняем отступ справа от текста */
+}
+
+.rating-section form input[type="number"] {
+    width: 100px; /* Уменьшаем ширину поля оценки */
+    padding: 0.5rem; /* Уменьшаем внутренний отступ для компактности */
+    margin-right: 1rem; /* Отступ справа от поля */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.rating-submit {
+    margin-left: 0.5rem; /* Уменьшаем отступ слева от кнопки для компактности */
+    padding: 0.5rem 1rem; /* Сохраняем размер кнопки, но делаем чуть меньше */
 }

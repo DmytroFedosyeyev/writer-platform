@@ -11,15 +11,15 @@
     <p class="meta"><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
 
     {% if average_rating is not None %}
-        <p class="meta"><strong>Средняя оценка:</strong> {{ average_rating|floatformat:2 }}/100</p>
+        <p class="meta"><strong>Средняя оценка:</strong> {{ average_rating|floatformat:1 }}/100</p>
     {% else %}
         <p class="meta">Ещё нет оценок.</p>
     {% endif %}
 
     <hr>
-        <div class="content">
-            {{ work.content|safe }}
-        </div>
+    <div class="content">
+        {{ work.content|safe }}
+    </div>
 
     <!-- Навигация по страницам текста с увеличенным отступом -->
     {% if content_page.has_other_pages %}
@@ -47,7 +47,7 @@
                     {% csrf_token %}
                     <span style="margin-right: 1rem;">Оцените произведение от 0 до 100:</span>
                     {{ rating_form.score }}
-                    <button type="submit" name="rate_submit" class="btn primary" style="margin-left: 1rem;">Отправить</button>
+                    <button type="submit" name="rate_submit" class="btn primary rating-submit">Отправить</button>
                     {% for error in rating_form.score.errors %}
                         <div class="error">{{ error }}</div>
                     {% endfor %}
