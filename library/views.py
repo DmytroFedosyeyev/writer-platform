@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Work, Rating
 from django.contrib.auth.decorators import login_required
@@ -13,21 +15,28 @@ from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 
+# Настройка логгера
+logger = logging.getLogger('library')
 
 @login_required
 def create_work_view(request):
+    logger.info("Запрос на создание нового произведения")
     if request.method == 'POST':
         form = WorkForm(request.POST)
         if form.is_valid():
             work = form.save(commit=False)
             work.author = request.user
             work.save()
+            logger.info(f"Произведение '{work.title}' успешно создано пользователем {request.user.username}")
             return redirect('work_list')
+        else:
+            logger.error(f"Ошибка валидации формы создания произведения: {form.errors}")
     else:
         form = WorkForm()
     return render(request, 'library/create_work.html', {'form': form})
 
 def work_detail_view(request, work_id):
+    logger.info(f"Запрос на просмотр произведения с ID {work_id}")
     work = get_object_or_404(Work, id=work_id)
     comments = work.comments.all().order_by('-created_at')
 
@@ -55,7 +64,10 @@ def work_detail_view(request, work_id):
                     rating.user = request.user
                     rating.work = work
                     rating.save()
+                    logger.info(f"Пользователь {request.user.username} оценил произведение {work.title} на {rating.score}")
                     return redirect('work_detail', work_id=work.id)
+                else:
+                    logger.error(f"Ошибка валидации формы рейтинга: {rating_form.errors}")
             elif 'comment_submit' in request.POST:
                 comment_form = CommentForm(request.POST)
                 if comment_form.is_valid():
@@ -63,9 +75,10 @@ def work_detail_view(request, work_id):
                     comment.user = request.user
                     comment.work = work
                     comment.save()
+                    logger.info(f"Пользователь {request.user.username} оставил комментарий к {work.title}")
                     return redirect('work_detail', work_id=work.id)
                 else:
-                    print(comment_form.errors)
+                    logger.error(f"Ошибка валидации формы комментария: {comment_form.errors}")
 
     # Средняя оценка
     average_rating = work.ratings.aggregate(Avg('score'))['score__avg']
@@ -85,6 +98,7 @@ def work_detail_view(request, work_id):
 
 #@login_required
 def work_list_view(request):
+    logger.info("Запрос на список произведений с фильтрами")
     title_query = request.GET.get('title', '')
     genre_filter = request.GET.get('genre', '')
     author_query = request.GET.get('author', '')
@@ -95,12 +109,15 @@ def work_list_view(request):
     # Применяем фильтры, если они заданы
     if title_query:
         works = works.filter(title__icontains=title_query)
+        logger.info(f"Применён фильтр по названию: {title_query}")
 
     if genre_filter:
         works = works.filter(genre=genre_filter)
+        logger.info(f"Применён фильтр по жанру: {genre_filter}")
 
     if author_query:
         works = works.filter(author__username__icontains=author_query)
+        logger.info(f"Применён фильтр по автору: {author_query}")
 
     # Пагинация
     paginator = Paginator(works, 5)  # 5 работ на страницу
@@ -117,6 +134,7 @@ def work_list_view(request):
 
 @login_required
 def export_work_pdf(request, work_id):
+    logger.info(f"Запрос на экспорт PDF для произведения с ID {work_id}")
     work = get_object_or_404(Work, id=work_id)
 
     # Создаём HTTP-ответ как PDF
@@ -155,20 +173,26 @@ def export_work_pdf(request, work_id):
 
     p.showPage()
     p.save()
+    logger.info(f"PDF для произведения '{work.title}' успешно экспортирован")
     return response
 
 def home_view(request):
+    logger.info("Запрос на главную страницу")
     latest_works = Work.objects.all().order_by('-published_date')[:5]
     return render(request, 'home.html', {'latest_works': latest_works})
 
 @login_required
 def edit_work_view(request, work_id):
+    logger.info(f"Запрос на редактирование произведения с ID {work_id}")
     work = get_object_or_404(Work, id=work_id, author=request.user)
     if request.method == 'POST':
         form = WorkForm(request.POST, instance=work)
         if form.is_valid():
             form.save()
+            logger.info(f"Произведение '{work.title}' успешно отредактировано пользователем {request.user.username}")
             return redirect('work_detail', work_id=work.id)
+        else:
+            logger.error(f"Ошибка валидации формы редактирования: {form.errors}")
     else:
         form = WorkForm(instance=work)
     return render(request, 'library/edit_work.html', {'form': form})
@@ -181,5 +205,7 @@ class WorkDeleteView(DeleteView):
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
         if obj.author != self.request.user:
+            logger.error(f"Пользователь {self.request.user.username} попытался удалить чужое произведение {obj.title}")
             raise PermissionDenied("У вас нет прав для удаления этого произведения.")
+        logger.info(f"Пользователь {self.request.user.username} запросил удаление произведения {obj.title}")
         return obj

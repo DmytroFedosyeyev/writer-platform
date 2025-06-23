@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
@@ -6,7 +8,11 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
 
+# Настройка логгера
+logger = logging.getLogger('users')
+
 def signup_view(request):
+    logger.info("Запрос на регистрацию нового пользователя")
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -15,27 +21,31 @@ def signup_view(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             login(request, user)
+            logger.info(f"Пользователь {username} успешно зарегистрирован")
             messages.success(request, 'Регистрация прошла успешно!')
             return redirect('user_home')
         else:
-            print(form.errors)
+            logger.error(f"Ошибка валидации формы регистрации: {form.errors}")
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
 
 @login_required
 def home_view(request):
+    logger.info(f"Запрос на просмотр профиля пользователя {request.user.username}")
     if request.method == 'POST':
         user = request.user
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
         user.email = request.POST.get('email', user.email)  # Добавлено поле email
         user.save()
+        logger.info(f"Профиль пользователя {request.user.username} успешно обновлён")
         messages.success(request, 'Профиль обновлён!')
         return redirect('user_home')
     return render(request, 'users/user_home.html', {'user': request.user})
 
 def profile_view(request, username):
+    logger.info(f"Запрос на просмотр профиля пользователя {username}")
     user = User.objects.get(username=username)
     if request.user.is_authenticated and request.user.username == username:
         # Если авторизованный пользователь просматривает свой профиль
