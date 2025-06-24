@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="work-detail">
-    <h2>{{ work.title }}</h2>
+    <h1 class="section-title">{{ work.title }}</h1>
     <p class="meta"><strong>Автор:</strong> {{ work.author.username }}</p>
     <p class="meta"><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
     <p class="meta"><strong>Опубликовано:</strong> {{ work.published_date|date:"d.m.Y H:i" }}</p>
@@ -17,30 +17,29 @@
     {% endif %}
 
     <hr>
-    <div class="content">
-        {{ work.content|safe }}
+    <div class="content" style="margin-bottom: 2rem;">
+        <div class="text-container" id="text-block">
+            {{ content|safe }}
+        </div>
     </div>
 
-    <!-- Навигация по страницам текста с увеличенным отступом -->
-    {% if content_page.has_other_pages %}
-        <div class="pagination mt-4" style="margin-top: 1.5rem;">
-            {% if content_page.has_previous %}
-                <a href="?page={{ content_page.previous_page_number }}" class="btn secondary">← Предыдущая</a>
+    {% if total_pages > 1 %}
+        <div class="pagination mt-4 sticky-pagination" style="margin-top: 1.5rem;">
+            {% if page_number > 1 %}
+                <a href="?page={{ page_number|add:-1 }}" class="btn outline">← Предыдущая</a>
             {% endif %}
-            {% for num in content_page.paginator.page_range %}
-                <a href="?page={{ num }}" class="btn {% if content_page.number == num %}primary{% else %}outline{% endif %}">{{ num }}</a>
-            {% endfor %}
-            {% if content_page.has_next %}
-                <a href="?page={{ content_page.next_page_number }}" class="btn secondary">Следующая →</a>
+            <span class="page-indicator">Страница {{ page_number }} из {{ total_pages }}</span>
+            {% if page_number < total_pages %}
+                <a href="?page={{ page_number|add:1 }}" class="btn outline">Следующая →</a>
             {% endif %}
         </div>
     {% endif %}
 
-    <!-- Сообщение для неавторизованных пользователей -->
+    <a href="{% url 'work_list' %}" class="btn secondary back-button">← Назад к списку</a>
+
     {% if show_auth_message %}
         <p class="text-center text-gray-600 mt-4">Чтобы оставлять комментарии или оценки, надо зарегистрироваться на сайте.</p>
     {% else %}
-        <!-- Рейтинг -->
         <div class="rating-section">
             {% if rating_form and not has_rated %}
                 <form method="post" style="display: inline-flex; align-items: center;">
@@ -57,7 +56,6 @@
             {% endif %}
         </div>
 
-        <!-- Комментарии -->
         <div class="comment-section">
             <h4>Оставить комментарий</h4>
             {% if comment_form %}
@@ -81,7 +79,6 @@
         </div>
     {% endif %}
 
-    <!-- Список комментариев -->
     <div class="mt-4">
         <h4>Комментарии:</h4>
         {% for comment in comments %}
@@ -94,7 +91,23 @@
             <p>Пока нет комментариев.</p>
         {% endfor %}
     </div>
-
-    <a href="{% url 'work_list' %}" class="btn secondary back-button">← Назад к списку</a>
 </div>
+
+<script>
+    if (window.location.search.includes('page=')) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const block = document.getElementById("text-block");
+        if (block) {
+            const rect = block.getBoundingClientRect();
+            const scrollY = window.scrollY || window.pageYOffset;
+            const offsetTop = rect.top + scrollY - window.innerHeight / 5;
+            window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        }
+    });
+</script>
+
 {% endblock %}

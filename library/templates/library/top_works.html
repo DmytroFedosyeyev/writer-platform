@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Топ-50 произведений{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Топ-50 произведений</h2>
+
+<div class="form-container" style="margin-bottom: 2rem;">
+    <h3 class="mb-3">Сортировка</h3>
+    <form method="get">
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label>Сортировать по:</label>
+            <select name="sort" class="form-control" onchange="this.form.submit()">
+                <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Оценкам</option>
+                <option value="comments" {% if sort_by == 'comments' %}selected{% endif %}>Комментариям</option>
+                <option value="genre" {% if sort_by == 'genre' %}selected{% endif %}>Жанру</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="work-list">
+    {% for work in works %}
+        <div class="work-card" style="margin-bottom: 1.5rem;">
+            <h4>{{ work.title }}</h4>
+            <p><strong>Автор:</strong>
+                {% if work.author %}
+                    <a href="{% url 'user_profile' work.author.username %}">{{ work.author.username }}</a>
+                {% else %}
+                    <span class="text-gray-500">Автор удалён</span>
+                {% endif %}
+            </p>
+            <p><strong>Жанр:</strong> {{ work.get_genre_display }}</p>
+            <p><strong>Средняя оценка:</strong> {{ work.avg_rating|default:"Нет оценок" }}</p>
+            <p><strong>Комментариев:</strong> {{ work.comment_count|default:"0" }}</p>
+            <a href="{% url 'work_detail' work.id %}" class="btn outline">Читать полностью</a>
+        </div>
+    {% empty %}
+        <p>Нет произведений в топ-50.</p>
+    {% endfor %}
+</div>
+{% endblock %}
