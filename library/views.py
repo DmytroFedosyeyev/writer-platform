@@ -13,6 +13,7 @@ from django.views.generic.edit import DeleteView
 from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.utils.html import strip_tags
 
 # Настройка логгера для записи событий приложения
 logger = logging.getLogger('library')
@@ -170,46 +171,71 @@ def work_list_view(request):
 # Функция для экспорта произведения в PDF, доступна только авторизованным
 @login_required
 def export_work_pdf(request, work_id):
+    """
+    Экспортирует произведение в PDF-файл.
+    Аргументы:
+        request: HTTP-запрос
+        work_id: ID произведения
+    Возвращает:
+        HttpResponse с сгенерированным PDF
+    """
     logger.info(f"Запрос на экспорт PDF для произведения с ID {work_id}")
-    # Получение произведения или 404, если не найдено
     work = get_object_or_404(Work, id=work_id)
 
-    # Настройка HTTP-ответа с типом PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{work.title}.pdf"'
 
-    # Регистрация шрифта для PDF
+    # Путь к шрифту, с обработкой ошибки
     font_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fonts', 'DejaVuSans.ttf')
-    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    try:
+        pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    except Exception as e:
+        logger.error(f"Ошибка загрузки шрифта: {e}")
+        pdfmetrics.registerFont(TTFont('Helvetica', 'Helvetica'))  # Запасной шрифт
 
     p = canvas.Canvas(response)
-    y = 800  # Начальная позиция по вертикали
+    y = 750  # Начальная позиция с запасом
+    width = 400  # Ширина текста на странице
 
     # Установка шрифта и вывод заголовка
     p.setFont("DejaVuSans", 16)
     p.drawString(100, y, work.title)
-    y -= 30
+    y -= 40
 
-    # Вывод метаданных произведения
+    # Вывод метаданных
     p.setFont("DejaVuSans", 12)
     p.drawString(100, y, f"Автор: {work.author.username}")
     y -= 20
     p.drawString(100, y, f"Жанр: {work.get_genre_display()}")
     y -= 20
     p.drawString(100, y, f"Дата публикации: {work.published_date.strftime('%d.%m.%Y %H:%M')}")
-    y -= 40
+    y -= 30
 
-    # Вывод содержимого построчно
-    content_lines = work.content.split('\n')
-    for line in content_lines:
-        if y < 50:  # Переход на новую страницу, если место заканчивается
+    # Очистка HTML и разбиение текста
+    clean_content = strip_tags(work.content)  # Удаляем HTML-теги
+    words = clean_content.split()
+    lines = []
+    current_line = []
+    for word in words:
+        test_line = " ".join(current_line + [word])
+        if p.stringWidth(test_line, "DejaVuSans", 12) < width:
+            current_line.append(word)
+        else:
+            lines.append(" ".join(current_line))
+            current_line = [word]
+    if current_line:
+        lines.append(" ".join(current_line))
+
+    # Вывод текста построчно с пагінацией
+    for line in lines:
+        if y < 50:  # Переход на новую страницу
             p.showPage()
             p.setFont("DejaVuSans", 12)
-            y = 800
-        p.drawString(100, y, line.strip())
-        y -= 20
+            y = 750
+        p.drawString(100, y, line)
+        y -= 15
 
-    p.showPage()  # Завершение последней страницы
+    p.showPage()
     p.save()
     logger.info(f"PDF для произведения '{work.title}' успешно экспортирован")
     return response

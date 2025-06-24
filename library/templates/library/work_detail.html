@@ -91,6 +91,13 @@
             <p>Пока нет комментариев.</p>
         {% endfor %}
     </div>
+
+    <!-- Кнопка для экспорта произведения в PDF -->
+    <div class="mt-3">
+        <a href="{% url 'export_work_pdf' work.id %}" class="btn btn-primary">
+            Экспорт в PDF
+        </a>
+    </div>
 </div>
 
 <script>
@@ -109,5 +116,4 @@
         }
     });
 </script>
-
 {% endblock %}
