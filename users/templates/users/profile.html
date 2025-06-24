@@ -1,26 +1,42 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ user.username }} - Профиль{% endblock %}
+{% block title %}Профиль пользователя: {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
-  <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Профиль пользователя: {{ user.username }}</h2>
+<h2>Профиль пользователя: {{ user.username }}</h2>
 
-  <p><strong>Логин:</strong> {{ user.username }}</p>
-  <p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
-  <p><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+<div class="profile-container" style="display: flex; gap: 2rem; margin-top: 1rem; align-items: flex-start;">
+    <!-- Фото профиля -->
+    <div class="profile-photo" style="flex: 1;">
+        {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="Фото {{ user.username }}"
+                 style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        {% else %}
+            <div style="width: 200px; height: 200px; background: #ddd;
+                        border-radius: 8px; display: flex; align-items: center;
+                        justify-content: center; color: #666;">
+                Фото отсутствует
+            </div>
+        {% endif %}
+    </div>
 
-  <h3 class="mt-6 text-lg font-semibold">Произведения автора</h3>
-  {% if user.work_set.all %}
-    <ul class="list-disc pl-5 mt-2">
-      {% for work in user.work_set.all %}
-        <li>{{ work.title }} - <a href="{% url 'work_detail' work.id %}" class="text-blue-500 hover:underline">Просмотр</a></li>
-      {% empty %}
-        <p>У автора нет произведений.</p>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>У автора нет произведений.</p>
-  {% endif %}
+    <!-- Информация об авторе -->
+    <div class="profile-info" style="flex: 2;">
+        <p><strong>Логин:</strong> {{ user.username }}</p>
+        <p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
+        <p><strong>Email:</strong> {{ user.email|default:"Не указан" }}</p>
+
+        <h3 style="margin-top: 2rem;">Произведения автора</h3>
+        {% if user.work_set.all %}
+            <ul>
+                {% for work in user.work_set.all %}
+                    <li>{{ work.title }} - <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>У автора нет произведений.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

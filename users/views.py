@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import CustomUserCreationForm
 from django.contrib.auth.models import User
-
+from .models import UserProfile
 
 # Настройка логгера
 logger = logging.getLogger('users')
@@ -33,27 +33,30 @@ def signup_view(request):
 @login_required
 def home_view(request):
     logger.info(f"Запрос на просмотр профиля пользователя {request.user.username}")
-    if request.method == 'POST':
-        user = request.user
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.email = request.POST.get('email', user.email)  # Добавлено поле email
-        user.save()
-        logger.info(f"Профиль пользователя {request.user.username} успешно обновлён")
-        messages.success(request, 'Профиль обновлён!')
-        return redirect('user_home')
-    return render(request, 'users/user_home.html', {'user': request.user})
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST' and request.FILES.get('photo'):
+        try:
+            profile.photo = request.FILES['photo']
+            profile.save()
+            logger.info(f"Фото пользователя {request.user.username} успешно обновлено")
+            messages.success(request, "Фото успешно обновлено!")
+        except Exception as e:
+            logger.error(f"Ошибка при загрузке фото: {e}")
+            messages.error(request, f"Ошибка при загрузке фото: {e}")
+
+    return render(request, 'users/user_home.html', {'user': request.user, 'profile': profile})
 
 def profile_view(request, username):
     logger.info(f"Запрос на просмотр профиля пользователя {username}")
     user = User.objects.get(username=username)
+    profile, created = UserProfile.objects.get_or_create(user=user)
     if request.user.is_authenticated and request.user.username == username:
         # Если авторизованный пользователь просматривает свой профиль
-        return render(request, 'users/user_home.html', {'user': user})
+        return render(request, 'users/user_home.html', {'user': user, 'profile': profile})
     else:
         # Для гостей или просмотра чужого профиля
-        return render(request, 'users/profile.html', {'user': user})
-
+        return render(request, 'users/profile.html', {'user': user, 'profile': profile})
 
 @login_required
 def delete_account_view(request):

@@ -9,34 +9,67 @@
 
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
     {% endfor %}
 {% endif %}
 
-<p><strong>Логин:</strong> {{ user.username }}</p>
-<p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
-<p><strong>Электронная почта:</strong> {{ user.email|default:"Не указана" }}</p>
+<div class="profile-container" style="display: flex; gap: 2rem; margin-top: 1rem; align-items: flex-start;">
+    <!-- Фото профиля -->
+    <div class="profile-photo" style="flex: 1;">
+        {% if profile.photo %}
+            <img src="{{ profile.photo.url }}" alt="Фото {{ user.username }}"
+                 style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        {% else %}
+            <div style="width: 200px; height: 200px; background: #ddd;
+                        border-radius: 8px; display: flex; align-items: center;
+                        justify-content: center; color: #666;">
+                Фото отсутствует
+            </div>
+        {% endif %}
 
-{% if user == request.user %}
-    <div class="mt-3"></div>
-    <h3>Редактировать данные</h3>
-    <form method="post" action="">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="id_first_name">Имя</label>
-            <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="id_last_name">Фамилия</label>
-            <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="id_email">Электронная почта</label>
-            <input type="email" name="email" id="id_email" value="{{ user.email }}" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-    </form>
-    <div class="mt-3"></div>
+        {% if user == request.user %}
+            <form method="post" enctype="multipart/form-data" style="margin-top: 1rem;">
+                {% csrf_token %}
+                <label class="btn outline" style="cursor: pointer;">
+                    Выбрать фото
+                    <input type="file" name="photo" accept="image/*" style="display: none;" onchange="this.form.submit();">
+                </label>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Личная информация и редактирование -->
+    <div class="profile-info" style="flex: 2;">
+        <p><strong>Логин:</strong> {{ user.username }}</p>
+        <p><strong>Имя и фамилия:</strong> {{ user.get_full_name|default:"Не указано" }}</p>
+        <p><strong>Электронная почта:</strong> {{ user.email|default:"Не указана" }}</p>
+
+        {% if user == request.user %}
+            <div class="mt-3">
+                <h3>Редактировать данные</h3>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_first_name">Имя</label>
+                        <input type="text" name="first_name" id="id_first_name" value="{{ user.first_name }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Фамилия</label>
+                        <input type="text" name="last_name" id="id_last_name" value="{{ user.last_name }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">Электронная почта</label>
+                        <input type="email" name="email" id="id_email" value="{{ user.email }}" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Произведения пользователя -->
+<div class="mt-3">
     <h2>Ваши произведения</h2>
     {% if user.work_set.all %}
         <ul>
@@ -44,30 +77,17 @@
                 <li>{{ work.title }} -
                     <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a>
                     <a href="{% url 'edit_work' work.id %}" class="btn btn-secondary">Редактировать</a>
-                    <a href="{% url 'work_delete' work.id %}" class="profile-action" data-method="post" data-confirm="Вы уверены, что хотите удалить произведение {{ work.title }}?">Удалить</a>
+                    <a href="{% url 'work_delete' work.id %}" class="profile-action"
+                       data-method="post"
+                       data-confirm="Вы уверены, что хотите удалить произведение {{ work.title }}?">Удалить</a>
                 </li>
-            {% empty %}
-                <p>У вас нет произведений.</p>
             {% endfor %}
         </ul>
     {% else %}
         <p>У вас нет произведений.</p>
     {% endif %}
     <a href="{% url 'create_work' %}" class="btn btn-primary">Добавить произведение</a>
-{% else %}
-    <h3>Произведения автора</h3>
-    {% if user.work_set.all %}
-        <ul>
-            {% for work in user.work_set.all %}
-                <li>{{ work.title }} - <a href="{% url 'work_detail' work.id %}" class="btn btn-outline">Просмотр</a></li>
-            {% empty %}
-                <p>У автора нет произведений.</p>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>У автора нет произведений.</p>
-    {% endif %}
-{% endif %}
+</div>
 
 {% if user == request.user %}
 <div class="mt-3">

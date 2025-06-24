@@ -29,7 +29,7 @@ urlpatterns = [
     path('works/', include('library.urls')),
     path('top-works/', top_works_view, name='top_works'),
     path('delete-account/', users_views.delete_account_view, name='delete_account'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
