@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, EditUserForm
 from django.contrib.auth.models import User
 from .models import UserProfile
 
@@ -83,3 +83,21 @@ def delete_account_view(request):
         messages.success(request, 'Ваш аккаунт удалён. До свидания!')
         return redirect('home')
     return render(request, 'users/delete_account.html')
+
+
+@login_required
+def edit_profile_view(request):
+    logger.info(f"Запрос на редактирование профиля пользователя {request.user.username}")
+    if request.method == 'POST':
+        form = EditUserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            logger.info(f"Пользователь {request.user.username} успешно обновил профиль")
+            messages.success(request, 'Профиль успешно обновлён!')
+            return redirect('user_home')
+        else:
+            logger.error(f"Ошибка при обновлении профиля: {form.errors}")
+    else:
+        form = EditUserForm(instance=request.user)
+
+    return render(request, 'users/edit_profile.html', {'form': form})

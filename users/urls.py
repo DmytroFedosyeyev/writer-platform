@@ -14,6 +14,7 @@ urlpatterns = [
     path('home/', views.home_view, name='user_home'),
     # Просмотр профиля пользователя по имени
     path('profile/<str:username>/', views.profile_view, name='user_profile'),
+    path('edit_profile/', views.edit_profile_view, name='edit_profile'),
 
     # Маршруты для восстановления пароля
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'), name='password_reset'),  # Запрос на сброс пароля

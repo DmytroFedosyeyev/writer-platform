@@ -30,3 +30,12 @@ class CustomUserCreationForm(UserCreationForm):
             # Сохранение пользователя в базе, если commit=True
             user.save()
         return user
+
+class EditUserForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=True, label="Имя")
+    last_name = forms.CharField(max_length=30, required=True, label="Фамилия")
+    email = forms.EmailField(required=True, label="Email")
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
