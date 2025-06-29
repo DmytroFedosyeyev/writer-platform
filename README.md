@@ -1,85 +1,89 @@
 # Writer Platform
 
-Writer Platform — это веб-приложение, предназначенное для публикации литературных произведений, взаимодействия с другими авторами и читателями, а также оценки и комментирования творчества.
+Writer Platform — это веб-приложение для публикации литературных произведений, оценки и комментирования текстов, а также взаимодействия между авторами и читателями.
+
+## Описание проекта
+
+Проект состоит из двух основных приложений:
+
+- users — управление пользователями: регистрация, вход, редактирование, фото профиля
+- library — публикация произведений, комментарии, рейтинги, фильтрация, экспорт в PDF
 
 ## Функциональность
 
-* Регистрация и вход пользователей
-* Личный кабинет (редактирование профиля, загрузка фото, отображение произведений)
-* Создание, редактирование и удаление произведений
-* Оценки (от 0 до 100) и комментарии
-* Поиск и фильтрация по названию, жанру, автору
-* Страница TOP-50 по оценкам, комментариям или жанрам
-* Пагинация текста произведений
-* Экспорт произведения в PDF
+- Регистрация и вход
+- Личный кабинет пользователя
+- Загрузка и отображение фото автора
+- Добавление, редактирование и удаление произведений
+- Оценка произведений по 100-балльной шкале
+- Оставление комментариев
+- Поиск по названию, жанру, автору
+- Отдельная страница с Топ-50 произведениями
+- Пагинация текста произведений
+- Экспорт текста в PDF
+- Удаление аккаунта
 
 ## Технический стек
 
-* Python 3.11+
-* Django 5.2
-* MySQL
-* HTML5, CSS3 (custom design, без Bootstrap)
-* JavaScript
-* CKEditor
-* ReportLab (PDF)
+- Python 3.11
+- Django 5.2
+- MySQL
+- HTML, CSS, JavaScript
+- CKEditor
+- ReportLab
+
+## Требования
+
+- Python 3.11
+- MySQL Server
+- Git (по желанию)
+- Виртуальное окружение (рекомендуется)
 
 ## Установка и запуск проекта локально
 
-1. **Клонируйте репозиторий:**
+1. Клонировать репозиторий: https://github.com/DmytroFedosyeyev/writer-platform
 
-```bash
-https://github.com/your_username/writer-platform.git
-cd writer-platform
-```
+2. Создать и активировать виртуальное окружение:
 
-2. **Создайте и активируйте виртуальное окружение:**
+Для Windows: python -m venv .venv
+.venv\Scripts\activate
 
-```bash
-python -m venv .venv
-source .venv/bin/activate  # или .venv\Scripts\activate для Windows
-```
+Для Linux или macOS:python3 -m venv .venv
+source .venv/bin/activate
 
-3. **Установите зависимости:**
+3. Установить зависимости: pip install -r requirements.txt
 
-```bash
-pip install -r requirements.txt
-```
+4. Настроить файл .env (если используется):
+EMAIL_HOST_USER=ваш_email@gmail.com
+EMAIL_HOST_PASSWORD=ваш_пароль
 
-4. **Если используется .env:**
+5. Настроить подключение к базе данных в файле settings.py:
 
-Создайте файл `.env` в корне проекта (esli нужно):
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'writer_platform',
+        'USER': 'ваш_пользователь',
+        'PASSWORD': 'ваш_пароль',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {'charset': 'utf8mb4'},
+    }
+}
 
-```
-EMAIL_HOST_USER=your_email@gmail.com
-EMAIL_HOST_PASSWORD=your_password
-```
-
-5. **Примените миграции:**
-
-```bash
+6. Выполнить миграции:
 python manage.py makemigrations
 python manage.py migrate
-```
 
-6. **Создайте суперпользователя:**
+7. Создать суперпользователя: python manage.py createsuperuser
 
-```bash
-python manage.py createsuperuser
-```
+8. Запустить сервер: python manage.py runserver
 
-7. **Запустите сервер:**
+9. Перейти по адресу: http://127.0.0.1:8000/
 
-```bash
-python manage.py runserver
-```
+Ссылка на развернутое приложение: https://dmytrofedosyeyev.pythonanywhere.com/ 
 
-8. **Откройте в браузере:**
-
-```
-http://127.0.0.1:8000
-```
-
----
-
-> Проект находится на этапе активной разработки. Если у вас есть предложения или ошибки — смело открывайте issue.
-
+Автор
+Dmytro Fedosyeyev
+fedoseevdv1975@gmail.com
